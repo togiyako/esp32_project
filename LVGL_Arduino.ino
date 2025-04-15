@@ -27,4 +27,5 @@ void setup() {
 
 void loop() {
   DataLogger_Loop();
+  Log_CheckInactivity();
 }

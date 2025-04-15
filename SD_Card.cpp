@@ -7,7 +7,9 @@ char logBuffer[LOG_BUFFER_SIZE];
 char currentLogFilename[32] = "/log_data_0.csv";
 void GenerateNewLogFilename();
 size_t bufferIndex = 0;
-
+File logFile;
+int64_t lastWriteTime = 0;
+const int64_t INACTIVITY_TIMEOUT_US = 300LL * 1000000; 
 uint16_t SDCard_Size;
 uint16_t Flash_Size;
 
@@ -47,6 +49,24 @@ bool SD_Init() {
   return true;
 }
 
+void Log_OpenFile() {
+  if (!logFile || !logFile) {
+    logFile = SD.open(currentLogFilename, FILE_APPEND);
+    if (logFile) {
+      printf("📂 File open for recording: %s\r\n", currentLogFilename);
+    } else {
+      printf("❌ Error opening file: %s\r\n", currentLogFilename);
+    }
+  }
+}
+
+void Log_CloseFile() {
+  if (logFile) {
+    logFile.close();
+    printf("📁 File closed due to inactivity.\r\n");
+  }
+}
+
 void GenerateNewLogFilename() {
   File root = SD.open("/");
   int maxIndex = -1;
@@ -58,11 +78,11 @@ void GenerateNewLogFilename() {
     const char* name = file.name();
     if (strstr(name, "log_data_") && strstr(name, ".csv")) {
       int index = -1;
-      // ЗМІНЕНО: без початкового /
+      
       sscanf(name, "log_data_%d.csv", &index);
       if (index > maxIndex) maxIndex = index;
     }
-    file.close(); // Не забудь закривати файл!
+    file.close(); 
   }
   root.close();
 
@@ -96,29 +116,32 @@ void Log_FlushToSD() {
   if (bufferIndex > 0) {
     int64_t startTime = esp_timer_get_time(); 
 
-    File logFile = SD.open(currentLogFilename, FILE_APPEND);
-    if (logFile) {
-      logFile.write((const uint8_t*)logBuffer, bufferIndex);
-      logFile.close();
-    } else {
-      printf("Error opening file for writing!\r\n");
-      return;
-    }
+    Log_OpenFile(); 
+    if (!logFile) return;
+
+    logFile.write((const uint8_t*)logBuffer, bufferIndex);
+    logFile.flush();
+
+    lastWriteTime = esp_timer_get_time(); 
 
     int64_t endTime = esp_timer_get_time(); 
-
-    // Обчислення
-    int64_t duration_us = endTime - startTime;
-    float duration_sec = duration_us / 1000000.0;
+    float duration_sec = (endTime - startTime) / 1000000.0;
     float speed_kbps = (bufferIndex / 1024.0) / duration_sec;
 
-    printf("Buffer flushed to SD card: %d bytes.\r\n", bufferIndex);
-    printf("Write time: %.2f ms | Speed: %.2f KB/s\r\n", duration_us / 1000.0, speed_kbps);
+    printf("✅ Data recorded: %d bytes | %.2f KB/s\r\n", bufferIndex, speed_kbps);
 
     memset(logBuffer, 0, LOG_BUFFER_SIZE);
     bufferIndex = 0;
   }
 }
+
+void Log_CheckInactivity() {
+  int64_t now = esp_timer_get_time();
+  if (logFile && (now - lastWriteTime > INACTIVITY_TIMEOUT_US)) {
+    Log_CloseFile();
+  }
+}
+
 
 /*bool File_Search(const char* directory, const char* fileName)    
 {

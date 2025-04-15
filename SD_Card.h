@@ -20,3 +20,4 @@ void remove_file_extension(char *file_name);
 
 void Log_Write(const char* data);
 void Log_FlushToSD();
+void Log_CheckInactivity();
