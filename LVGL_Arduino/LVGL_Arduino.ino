@@ -14,7 +14,7 @@ void setup() {
   SD_Init();
   DataLogger_Init();
 
-  //Lvgl_Example1();
+  Lvgl_Example1();
   //Flash_test();
   // lv_demo_widgets();               
   // lv_demo_benchmark();          
