@@ -99,7 +99,7 @@ void Lvgl_Example1(void) {
   lv_obj_add_style(label, &style_label, 0);
   lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
   
-  Serial.print("Згенероване випадкове число: ");
+  Serial.print("Genedaret random number: ");
   Serial.println(random_number);
 
   lv_task_handler();
