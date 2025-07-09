@@ -53,9 +53,9 @@ void Log_OpenFile() {
   if (!logFile || !logFile) {
     logFile = SD.open(currentLogFilename, FILE_APPEND);
     if (logFile) {
-      printf("📂 File open for recording: %s\r\n", currentLogFilename);
+      printf(" File open for recording: %s\r\n", currentLogFilename);
     } else {
-      printf("❌ Error opening file: %s\r\n", currentLogFilename);
+      printf(" Error opening file: %s\r\n", currentLogFilename);
     }
   }
 }
@@ -63,7 +63,7 @@ void Log_OpenFile() {
 void Log_CloseFile() {
   if (logFile) {
     logFile.close();
-    printf("📁 File closed due to inactivity.\r\n");
+    printf(" File closed due to inactivity.\r\n");
   }
 }
 
@@ -128,7 +128,7 @@ void Log_FlushToSD() {
     float duration_sec = (endTime - startTime) / 1000000.0;
     float speed_kbps = (bufferIndex / 1024.0) / duration_sec;
 
-    printf("✅ Data recorded: %d bytes | %.2f KB/s\r\n", bufferIndex, speed_kbps);
+    printf(" Data recorded: %d bytes | %.2f KB/s\r\n", bufferIndex, speed_kbps);
 
     memset(logBuffer, 0, LOG_BUFFER_SIZE);
     bufferIndex = 0;

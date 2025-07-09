@@ -21,7 +21,7 @@ static void FileWriterTask(void *pvParameters);
 void DataLogger_Init() {
   bufferSemaphore = xSemaphoreCreateBinary();
   if (bufferSemaphore == NULL) {
-    Serial.println("❌ Failed to create semaphore");
+    Serial.println(" Failed to create semaphore");
     return;
   }
 
@@ -38,7 +38,6 @@ void DataLogger_Loop() {
     if (ch == '\n') {
       inputLine.trim();
 
-      // Замінюємо пробіли та табуляції на коми
       inputLine.replace('\t', ',');
       inputLine.replace(' ', ',');
 
@@ -74,7 +73,7 @@ static void BufferSwitcherTask(void *pvParameters) {
 static void FileWriterTask(void *pvParameters) {
   for (;;) {
     if (xSemaphoreTake(bufferSemaphore, portMAX_DELAY) == pdTRUE) {
-      Serial.println("📝 Writing buffer to SD...");
+      Serial.println(" Writing buffer to SD...");
 
       for (int i = 0; i < BUFFER_LINES; i++) {
         char *line = (char *)volatileReadBuffer[i];
